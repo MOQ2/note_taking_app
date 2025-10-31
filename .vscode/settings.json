@@ -1,5 +1,6 @@
 {
   "dart.flutterSdkPath": "C:\\Users\\qadim\\flutter",
   "dart.debugExternalPackageLibraries": false,
-  "dart.debugSdkLibraries": false
+  "dart.debugSdkLibraries": false,
+  "java.configuration.updateBuildConfiguration": "interactive"
 }
