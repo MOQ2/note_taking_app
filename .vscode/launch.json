@@ -30,6 +30,25 @@
         "-d",
         "edge"
       ]
+    },
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "c:/Users/qadim/OneDrive/Desktop/gsg/Note_taking_app/note_taking_app/windows/flutter",
+      "program": "c:/Users/qadim/OneDrive/Desktop/gsg/Note_taking_app/note_taking_app/windows/flutter/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
     }
   ]
 }
