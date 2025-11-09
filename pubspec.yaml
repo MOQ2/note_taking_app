@@ -21,6 +21,14 @@ version: 1.0.0+1
 environment:
   sdk: ^3.9.0
 
+
+
+
+
+
+isar_version: &isar_version 3.1.0+1 # define the version to be used
+
+
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -30,22 +38,38 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  isar: *isar_version
+  isar_flutter_libs: *isar_version # contains Isar Core
+
+
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   firebase_core: ^4.2.0
+  flutter_quill: ^11.5.0
+  path_provider: ^2.1.5
+  shared_preferences: ^2.3.3
+  file_picker: ^8.1.4
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  
+  isar_generator: *isar_version
+  build_runner: ^2.4.13
+
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: 6.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
