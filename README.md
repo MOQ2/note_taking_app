@@ -18,22 +18,31 @@ A feature-rich Flutter note-taking application with rich text editing, categoriz
 
 
 ### Home Screen
-<!-- ![Home Screen](screenshots/home_screen.png) -->
-*Coming soon - Upload screenshot showing the home screen with categories and recent notes*
+<img width="761" height="1550" alt="image" src="https://github.com/user-attachments/assets/3044b88c-f288-44b5-910d-6e74e80ff6ff" />
 
 ### Note Editor
-<!-- ![Note Editor](screenshots/note_editor.png) -->
-*Coming soon - Upload screenshot showing the rich text editor interface*
+<img width="756" height="1576" alt="image" src="https://github.com/user-attachments/assets/cedc44f2-3a57-41fd-a517-bd7d2c999f55" />
+
 
 ### Notes List
-<!-- ![Notes List](screenshots/notes_list.png) -->
-*Coming soon - Upload screenshot showing the notes list view*
+<img width="773" height="1542" alt="image" src="https://github.com/user-attachments/assets/97e9930c-b32d-44ec-b08b-fa3089ecaaad" />
+<img width="753" height="1543" alt="image" src="https://github.com/user-attachments/assets/02f4c4a3-aa74-4c46-b31f-ab1f169999d3" />
+
 
 ### Search
-<!-- ![Search Screen](screenshots/search_screen.png) -->
-*Coming soon - Upload screenshot showing the search functionality*
+<img width="794" height="1560" alt="image" src="https://github.com/user-attachments/assets/a787eb0e-82e0-4c65-8fa5-a6e1163ec177" />
+<img width="586" height="939" alt="image" src="https://github.com/user-attachments/assets/513010bb-fa89-4d8a-b703-09548e160f86" />
+
+### Login
+<img width="784" height="1536" alt="image" src="https://github.com/user-attachments/assets/8d186bae-8946-4665-856c-deb47db2dfd2" />
+
+### sign up 
+<img width="757" height="1532" alt="image" src="https://github.com/user-attachments/assets/d4796e86-a983-4075-9f94-9bcf9b9357dc" />
 
 ## Demo Video
+
+https://github.com/user-attachments/assets/9c670fad-5fba-48e4-91fd-9aa6559c1c02
+
 
 
 
