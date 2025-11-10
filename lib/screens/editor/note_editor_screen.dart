@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-
 import '../../cubits/notes_bloc.dart';
 import '../../cubits/notes_event.dart';
 import '../../cubits/notes_state.dart';
@@ -12,6 +11,7 @@ import '../../services/note_editor_service.dart';
 import '../../widgets/attachments_list.dart';
 import '../../widgets/category_selector.dart';
 import '../../widgets/tag_input_field.dart';
+
 
 class NoteEditorScreen extends StatefulWidget {
   const NoteEditorScreen({super.key, this.noteId});
@@ -169,6 +169,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     );
 
     if (confirmed == true && mounted) {
+
       context.read<NotesBloc>().add(DeleteNote(widget.noteId!));
     }
   }
@@ -205,10 +206,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       listener: (context, state) {
         if (state is NoteSaved) {
           _showSnackBar(state.message);
-          Navigator.pop(context, true); // Return true when note is saved
+          Navigator.pop(context, true);
         } else if (state is NoteDeleted) {
           _showSnackBar(state.message);
-          Navigator.pop(context, true); // Return true when note is deleted (also a change)
+          Navigator.pop(context, true);
         } else if (state is NotesError) {
           _showSnackBar(state.message, isError: true);
         }
