@@ -14,6 +14,7 @@ A feature-rich Flutter note-taking application with rich text editing, categoriz
 - 🔐 Authentication 
 
 ## Screenshots
+<img width="1810" height="1613" alt="image" src="https://github.com/user-attachments/assets/22e82870-b795-4a75-afcd-e9f4a69cbe4b" />
 
 
 
