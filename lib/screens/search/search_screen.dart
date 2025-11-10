@@ -5,6 +5,9 @@ import '../../cubits/search_bloc.dart';
 import '../../cubits/search_event.dart';
 import '../../cubits/search_state.dart';
 import '../../models/notes_model.dart';
+import '../../utils/category_colors.dart';
+import '../../widgets/empty_state_widget.dart';
+import '../../widgets/filter_dialog_widget.dart';
 import '../../widgets/search_filter_bar.dart';
 import '../note_detail/note_detail_screen.dart';
 
@@ -56,205 +59,45 @@ class _SearchScreenState extends State<SearchScreen> {
     }
   }
 
-  void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return BlocBuilder<SearchBloc, SearchState>(
-          builder: (context, state) {
-            final filters = state.filters;
-            String tempCategory = filters.category;
-            String tempSortBy = filters.sortBy;
-            bool tempShowPinnedOnly = filters.showPinnedOnly;
-            DateTime? tempDateFrom = filters.dateFrom;
-            DateTime? tempDateTo = filters.dateTo;
+  void _showFilterDialog() async {
+    final state = context.read<SearchBloc>().state;
+    final filters = state.filters;
 
-            return StatefulBuilder(
-              builder: (context, setDialogState) {
-                return AlertDialog(
-                  title: const Text('Filter & Sort'),
-                  contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-                  content: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Category Filter
-                        Text(
-                          'Category',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Wrap(
-                          spacing: 8,
-                          children: _categoryOptions.map((category) {
-                            final isSelected = tempCategory == category;
-                            return FilterChip(
-                              label: Text(category),
-                              selected: isSelected,
-                              onSelected: (selected) {
-                                setDialogState(() {
-                                  tempCategory = selected ? category : 'All';
-                                });
-                              },
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // Sort Options
-                        Text(
-                          'Sort By',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          value: tempSortBy,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          ),
-                          items: const [
-                            DropdownMenuItem(value: 'Recent', child: Text('Most Recent')),
-                            DropdownMenuItem(value: 'Oldest', child: Text('Oldest First')),
-                            DropdownMenuItem(value: 'Title A-Z', child: Text('Title (A-Z)')),
-                            DropdownMenuItem(value: 'Title Z-A', child: Text('Title (Z-A)')),
-                          ],
-                          onChanged: (value) {
-                            setDialogState(() {
-                              tempSortBy = value!;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        
-                        // Pinned Only Filter
-                        CheckboxListTile(
-                          title: const Text('Show Pinned Only'),
-                          contentPadding: EdgeInsets.zero,
-                          value: tempShowPinnedOnly,
-                          onChanged: (value) {
-                            setDialogState(() {
-                              tempShowPinnedOnly = value ?? false;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        
-                        // Date Range Filter
-                        Text(
-                          'Date Range',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                icon: const Icon(Icons.calendar_today, size: 16),
-                                label: Text(
-                                  tempDateFrom == null 
-                                    ? 'From' 
-                                    : '${tempDateFrom!.month}/${tempDateFrom!.day}/${tempDateFrom!.year}',
-                                ),
-                                onPressed: () async {
-                                  final date = await showDatePicker(
-                                    context: context,
-                                    initialDate: tempDateFrom ?? DateTime.now(),
-                                    firstDate: DateTime(2020),
-                                    lastDate: DateTime.now(),
-                                  );
-                                  if (date != null) {
-                                    setDialogState(() {
-                                      tempDateFrom = date;
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                icon: const Icon(Icons.calendar_today, size: 16),
-                                label: Text(
-                                  tempDateTo == null 
-                                    ? 'To' 
-                                    : '${tempDateTo!.month}/${tempDateTo!.day}/${tempDateTo!.year}',
-                                ),
-                                onPressed: () async {
-                                  final date = await showDatePicker(
-                                    context: context,
-                                    initialDate: tempDateTo ?? DateTime.now(),
-                                    firstDate: tempDateFrom ?? DateTime(2020),
-                                    lastDate: DateTime.now(),
-                                  );
-                                  if (date != null) {
-                                    setDialogState(() {
-                                      tempDateTo = date;
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (tempDateFrom != null || tempDateTo != null)
-                          TextButton(
-                            onPressed: () {
-                              setDialogState(() {
-                                tempDateFrom = null;
-                                tempDateTo = null;
-                              });
-                            },
-                            child: const Text('Clear Dates'),
-                          ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        context.read<SearchBloc>().add(const ResetSearchFilters());
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Reset'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                    FilledButton(
-                      onPressed: () {
-                        context.read<SearchBloc>().add(
-                          UpdateSearchFilters(
-                            category: tempCategory,
-                            sortBy: tempSortBy,
-                            showPinnedOnly: tempShowPinnedOnly,
-                            dateFrom: tempDateFrom,
-                            dateTo: tempDateTo,
-                          ),
-                        );
-                        Navigator.pop(context);
-                        // Re-trigger search to apply filters
-                        if (_searchController.text.trim().isNotEmpty) {
-                          _onSearchChanged(_searchController.text);
-                        }
-                      },
-                      child: const Text('Apply'),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        );
-      },
+    final result = await showDialog<FilterDialogResult>(
+      context: context,
+      builder: (dialogContext) => FilterDialogWidget(
+        config: FilterDialogConfig(
+          selectedCategory: filters.category,
+          sortBy: filters.sortBy,
+          showPinnedOnly: filters.showPinnedOnly,
+          dateFrom: filters.dateFrom,
+          dateTo: filters.dateTo,
+          categoryOptions: _categoryOptions,
+          showDateFilter: true,
+        ),
+      ),
     );
+
+    if (result != null && mounted) {
+      if (result.wasReset) {
+        context.read<SearchBloc>().add(const ResetSearchFilters());
+      } else {
+        context.read<SearchBloc>().add(
+          UpdateSearchFilters(
+            category: result.category,
+            sortBy: result.sortBy,
+            showPinnedOnly: result.showPinnedOnly,
+            dateFrom: result.dateFrom,
+            dateTo: result.dateTo,
+          ),
+        );
+      }
+      
+      // Re-trigger search to apply filters
+      if (_searchController.text.trim().isNotEmpty) {
+        _onSearchChanged(_searchController.text);
+      }
+    }
   }
 
 
@@ -393,26 +236,9 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildEmptySearchState(String message, IconData icon) {
-    final theme = Theme.of(context);
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 64,
-            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+    return EmptyStateWidget(
+      icon: icon,
+      title: message,
     );
   }
 
@@ -454,13 +280,13 @@ class _SearchScreenState extends State<SearchScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: _colorForCategory(note.category).withOpacity(0.2),
+                          color: CategoryColors.getCategoryColor(note.category, context).withOpacity(0.2),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           note.category,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: _colorForCategory(note.category),
+                            color: CategoryColors.getCategoryColor(note.category, context),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -488,28 +314,5 @@ class _SearchScreenState extends State<SearchScreen> {
         );
       },
     );
-  }
-
-  Color _colorForCategory(String category) {
-    final theme = Theme.of(context);
-    final key = category.toLowerCase();
-    switch (key) {
-      case 'work':
-        return Colors.orange;
-      case 'personal':
-        return Colors.green;
-      case 'ideas':
-        return Colors.indigo;
-      case 'study':
-        return Colors.blue;
-      case 'health':
-        return Colors.redAccent;
-      case 'travel':
-        return Colors.teal;
-      case 'finance':
-        return Colors.deepPurple;
-      default:
-        return theme.colorScheme.primary;
-    }
   }
 }
