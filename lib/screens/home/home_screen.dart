@@ -7,7 +7,9 @@ import '../../cubits/home_state.dart';
 import '../../models/home_overview_model.dart';
 import '../../models/notes_model.dart';
 import '../../services/auth_service.dart';
+import '../../utils/category_colors.dart';
 import '../../widgets/category_grid_item.dart';
+import '../../widgets/empty_state_widget.dart';
 import '../../widgets/home_app_bar.dart';
 import '../../widgets/pinned_note_card.dart';
 import '../../widgets/recent_note_card.dart';
@@ -233,9 +235,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Handle error state
           if (state is HomeError) {
-            return _ErrorState(
-              message: 'Something went wrong while loading your notes.',
-              onRetry: () async => _handleRefresh(),
+            return EmptyStateWidget(
+              icon: Icons.error_outline,
+              title: 'Something went wrong',
+              subtitle: 'Failed to load your notes.',
+              actionButton: ElevatedButton(
+                onPressed: () async => _handleRefresh(),
+                child: const Text('Retry'),
+              ),
             );
           }
 
@@ -279,7 +286,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPinnedList(List<Note> pinnedNotes) {
     if (pinnedNotes.isEmpty) {
-      return const _EmptyState(message: 'Pin notes to access them quickly.');
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            'Pin notes to access them quickly.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
     }
 
     return SizedBox(
@@ -293,7 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
             tag: 'Pinned',
             title: note.title,
             description: note.summary,
-            tagColor: _colorForCategory(note.category),
+            tagColor: CategoryColors.getCategoryColor(note.category, context),
             onTap: () async {
               final result = await Navigator.push(
                 context,
@@ -316,8 +339,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategoriesGrid(List<CategorySummary> categories) {
     if (categories.isEmpty) {
-      return const _EmptyState(
-        message: 'Create categories to organise your notes.',
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            'Create categories to organise your notes.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
       );
     }
 
@@ -348,7 +385,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildRecentList(List<Note> recentNotes) {
     if (recentNotes.isEmpty) {
-      return const _EmptyState(message: 'Recently created notes show up here.');
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            'Recently created notes show up here.',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
     }
 
     return SizedBox(
@@ -378,88 +431,6 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemCount: recentNotes.length,
-      ),
-    );
-  }
-
-  Color _colorForCategory(String category) {
-    final theme = Theme.of(context);
-    final key = category.toLowerCase();
-    switch (key) {
-      case 'work':
-        return Colors.orange;
-      case 'personal':
-        return Colors.green;
-      case 'ideas':
-        return Colors.indigo;
-      case 'study':
-        return Colors.blue;
-      case 'health':
-        return Colors.redAccent;
-      case 'travel':
-        return Colors.teal;
-      case 'finance':
-        return Colors.deepPurple;
-      default:
-        return theme.colorScheme.primary;
-    }
-  }
-}
-
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          message,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorState extends StatelessWidget {
-  const _ErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final Future<void> Function() onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline, color: theme.colorScheme.error, size: 48),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              style: theme.textTheme.bodyLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
-          ],
-        ),
       ),
     );
   }
