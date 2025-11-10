@@ -15,7 +15,7 @@ A feature-rich Flutter note-taking application with rich text editing, categoriz
 
 ## Screenshots
 
-> **Note:** Add your app screenshots here to showcase the UI and features
+
 
 ### Home Screen
 <!-- ![Home Screen](screenshots/home_screen.png) -->
@@ -39,7 +39,6 @@ A feature-rich Flutter note-taking application with rich text editing, categoriz
 
 <!-- 
 ### Option 1: Embedded YouTube Video
-[![Demo Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
 
 ### Option 2: Direct Video Link
 [Watch Demo Video](link-to-your-video.mp4)
