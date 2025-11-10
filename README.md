@@ -35,19 +35,9 @@ A feature-rich Flutter note-taking application with rich text editing, categoriz
 
 ## Demo Video
 
-> **Note:** Add a demo video to show the app in action
 
-<!-- 
-### Option 1: Embedded YouTube Video
 
-### Option 2: Direct Video Link
-[Watch Demo Video](link-to-your-video.mp4)
 
-### Option 3: GIF Animation
-![App Demo](demo/app_demo.gif)
--->
-
-*Coming soon - Upload a video demonstration of the app features*
 
 ## Architecture
 
