@@ -5,6 +5,9 @@ import '../../cubits/notes_bloc.dart';
 import '../../cubits/notes_event.dart';
 import '../../cubits/notes_state.dart';
 import '../../models/notes_model.dart';
+import '../../utils/date_formatter.dart';
+import '../../widgets/empty_state_widget.dart';
+import '../../widgets/filter_dialog_widget.dart';
 import '../editor/note_editor_screen.dart';
 import '../note_detail/note_detail_screen.dart';
 
@@ -75,118 +78,27 @@ class _NotesScreenState extends State<NotesScreen> {
     return filtered;
   }
 
-  void _showFilterDialog() {
-    showDialog(
+  void _showFilterDialog() async {
+    final result = await showDialog<FilterDialogResult>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Filter & Sort'),
-          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Category Filter
-                Text(
-                  'Category',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                Wrap(
-                  spacing: 8,
-                  children: _categoryOptions.map((category) {
-                    final isSelected = _selectedCategory == category;
-                    return FilterChip(
-                      label: Text(category),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        setDialogState(() {
-                          _selectedCategory = selected ? category : 'All';
-                        });
-                        setState(() {
-                          _selectedCategory = selected ? category : 'All';
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 16),
-
-                // Sort Options
-                Text(
-                  'Sort By',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: _sortBy,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  ),
-                  items: const [
-                    DropdownMenuItem(
-                        value: 'Recent', child: Text('Most Recent')),
-                    DropdownMenuItem(
-                        value: 'Oldest', child: Text('Oldest First')),
-                    DropdownMenuItem(
-                        value: 'Title A-Z', child: Text('Title (A-Z)')),
-                    DropdownMenuItem(
-                        value: 'Title Z-A', child: Text('Title (Z-A)')),
-                  ],
-                  onChanged: (value) {
-                    setDialogState(() {
-                      _sortBy = value!;
-                    });
-                    setState(() {
-                      _sortBy = value!;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Pinned Only Filter
-                CheckboxListTile(
-                  title: const Text('Show Pinned Only'),
-                  contentPadding: EdgeInsets.zero,
-                  value: _showPinnedOnly,
-                  onChanged: (value) {
-                    setDialogState(() {
-                      _showPinnedOnly = value ?? false;
-                    });
-                    setState(() {
-                      _showPinnedOnly = value ?? false;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  _selectedCategory = 'All';
-                  _sortBy = 'Recent';
-                  _showPinnedOnly = false;
-                });
-                Navigator.of(context).pop();
-              },
-              child: const Text('Reset'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Apply'),
-            ),
-          ],
+      builder: (context) => FilterDialogWidget(
+        config: FilterDialogConfig(
+          selectedCategory: _selectedCategory,
+          sortBy: _sortBy,
+          showPinnedOnly: _showPinnedOnly,
+          categoryOptions: _categoryOptions,
+          showDateFilter: false,
         ),
       ),
     );
+
+    if (result != null && mounted) {
+      setState(() {
+        _selectedCategory = result.category;
+        _sortBy = result.sortBy;
+        _showPinnedOnly = result.showPinnedOnly;
+      });
+    }
   }
 
   @override
@@ -275,33 +187,12 @@ class _NotesScreenState extends State<NotesScreen> {
             final notes = _filterAndSortNotes(state.notes);
 
             if (notes.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.note_outlined,
-                      size: 80,
-                      color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      state.notes.isEmpty ? 'No notes yet' : 'No notes match your filters',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.notes.isEmpty 
-                          ? 'Tap the + button to create your first note'
-                          : 'Try adjusting your filters',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
+              return EmptyStateWidget(
+                icon: Icons.note_outlined,
+                title: state.notes.isEmpty ? 'No notes yet' : 'No notes match your filters',
+                subtitle: state.notes.isEmpty 
+                    ? 'Tap the + button to create your first note'
+                    : 'Try adjusting your filters',
               );
             }
 
@@ -379,6 +270,7 @@ class _NotesScreenState extends State<NotesScreen> {
             children: [
               // Header with title and pin icon
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: Text(
@@ -388,14 +280,17 @@ class _NotesScreenState extends State<NotesScreen> {
                       ),
                       maxLines: isGrid ? 2 : 1,
                       overflow: TextOverflow.ellipsis,
+                      softWrap: true,
                     ),
                   ),
-                  if (note.isPinned)
+                  if (note.isPinned) ...[
+                    const SizedBox(width: 4),
                     Icon(
                       Icons.push_pin,
                       size: 16,
                       color: theme.colorScheme.primary,
                     ),
+                  ],
                 ],
               ),
               const SizedBox(height: 8),
@@ -420,6 +315,9 @@ class _NotesScreenState extends State<NotesScreen> {
                   children: [
                     if (hasCategory)
                       Container(
+                        constraints: BoxConstraints(
+                          maxWidth: isGrid ? 100 : 120,
+                        ),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 4,
@@ -433,10 +331,15 @@ class _NotesScreenState extends State<NotesScreen> {
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.onPrimaryContainer,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ...note.tags.take(isGrid ? 2 : 3).map(
                           (tag) => Container(
+                            constraints: BoxConstraints(
+                              maxWidth: isGrid ? 80 : 100,
+                            ),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 4,
@@ -450,6 +353,8 @@ class _NotesScreenState extends State<NotesScreen> {
                               style: theme.textTheme.labelSmall?.copyWith(
                                 color: theme.colorScheme.onSecondaryContainer,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
@@ -460,7 +365,7 @@ class _NotesScreenState extends State<NotesScreen> {
               // Date
               const SizedBox(height: 8),
               Text(
-                _formatDate(note.updatedAt),
+                DateFormatter.formatRelative(note.updatedAt),
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant.withOpacity(0.7),
                 ),
@@ -470,30 +375,5 @@ class _NotesScreenState extends State<NotesScreen> {
         ),
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays == 0) {
-      if (difference.inHours == 0) {
-        if (difference.inMinutes == 0) {
-          return 'Just now';
-        }
-        return '${difference.inMinutes}m ago';
-      }
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inDays < 30) {
-      return '${(difference.inDays / 7).floor()}w ago';
-    } else if (difference.inDays < 365) {
-      return '${(difference.inDays / 30).floor()}mo ago';
-    } else {
-      return '${(difference.inDays / 365).floor()}y ago';
-    }
   }
 }
