@@ -7,6 +7,9 @@ import 'package:flutter_quill/flutter_quill.dart';
 import '../../cubits/notes_bloc.dart';
 import '../../cubits/notes_event.dart';
 import '../../cubits/notes_state.dart';
+import '../../utils/category_colors.dart';
+import '../../utils/date_formatter.dart';
+import '../../widgets/empty_state_widget.dart';
 import '../editor/note_editor_screen.dart';
 
 class NoteDetailScreen extends StatefulWidget {
@@ -59,38 +62,6 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
     }
   }
 
-  String _formatDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    final month = months[date.month - 1];
-    final day = date.day.toString().padLeft(2, '0');
-    final year = date.year;
-    final hour = date.hour.toString().padLeft(2, '0');
-    final minute = date.minute.toString().padLeft(2, '0');
-    return '$month $day, $year - $hour:$minute';
-  }
-
-  Color _getCategoryColor(String category) {
-    final key = category.toLowerCase();
-    switch (key) {
-      case 'work':
-        return Colors.orange;
-      case 'personal':
-        return Colors.green;
-      case 'ideas':
-        return Colors.indigo;
-      case 'study':
-        return Colors.blue;
-      case 'health':
-        return Colors.redAccent;
-      case 'travel':
-        return Colors.teal;
-      case 'finance':
-        return Colors.deepPurple;
-      default:
-        return Theme.of(context).colorScheme.primary;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -137,33 +108,13 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
             appBar: AppBar(
               title: const Text('Note Not Found'),
             ),
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.note_outlined,
-                    size: 64,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Note not found',
-                    style: theme.textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'This note may have been deleted',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Go Back'),
-                  ),
-                ],
+            body: EmptyStateWidget(
+              icon: Icons.note_outlined,
+              title: 'Note not found',
+              subtitle: 'This note may have been deleted',
+              actionButton: ElevatedButton(
+                onPressed: () => Navigator.pop(context, _noteWasModified),
+                child: const Text('Go Back'),
               ),
             ),
           );
@@ -249,12 +200,12 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                         avatar: Icon(
                           Icons.folder_outlined,
                           size: 16,
-                          color: _getCategoryColor(note.category),
+                          color: CategoryColors.getCategoryColor(note.category, context),
                         ),
                         label: Text(note.category),
-                        backgroundColor: _getCategoryColor(note.category).withOpacity(0.1),
+                        backgroundColor: CategoryColors.getCategoryColor(note.category, context).withOpacity(0.1),
                         side: BorderSide(
-                          color: _getCategoryColor(note.category).withOpacity(0.3),
+                          color: CategoryColors.getCategoryColor(note.category, context).withOpacity(0.3),
                         ),
                       ),
                     
@@ -307,7 +258,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Created: ${_formatDate(note.createdAt)}',
+                        'Created: ${DateFormatter.formatDetailed(note.createdAt)}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -324,7 +275,7 @@ class _NoteDetailScreenState extends State<NoteDetailScreen> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Updated: ${_formatDate(note.updatedAt)}',
+                        'Updated: ${DateFormatter.formatDetailed(note.updatedAt)}',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
